@@ -58,6 +58,22 @@
       ]
     },
     {
+      "subsystem": "graphic",
+      "components": [
+        {
+          "component": "graphics_effect"
+        }
+      ]
+    },
+    {
+      "subsystem": "telephony",
+      "components": [
+        {
+          "component": "telephony_data"
+        }
+      ]
+    },
+    {
       "subsystem": "thirdparty",
       "components": [
         {
@@ -79,6 +95,21 @@
           "component": "rust_libc"
         },
         {
+          "component": "optimized_routines"
+        },
+        {
+          "component": "lzma"
+        },
+        {
+          "component": "vulkan-loader"
+        },
+        {
+          "component": "abseil-cpp"
+        },
+        {
+          "component": "vma"
+        },
+        {
           "component": "eudev",
           "exclude": "true"
         },
@@ -96,6 +127,12 @@
           "features": [
             "access_token_enhance_capability = false"
           ]
+        },
+        {
+          "component": "security_guard"
+        },
+        {
+          "component": "asset"
         }
       ]
     }
