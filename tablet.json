@@ -46,6 +46,21 @@
       "components": [
         {
           "component": "drivers_interface_memorytracker"
+        },
+        {
+          "component": "drivers_interface_partitionslot"
+        },
+        {
+          "component": "drivers_peripheral_partitionslot"
+        },
+        {
+          "component": "drivers_interface_bluetooth"
+        },
+        {
+          "component": "drivers_interface_distributed_audio"
+        },
+        {
+          "component": "drivers_tools"
         }
       ]
     },
@@ -70,6 +85,26 @@
       "components": [
         {
           "component": "telephony_data"
+        },
+        {
+          "component": "core_service"
+        },
+        {
+          "component": "cellular_data"
+        },
+        {
+          "component": "call_manager"
+        },
+        {
+          "component": "state_registry"
+        }
+      ]
+    },
+    {
+      "subsystem": "tee",
+      "components": [
+        {
+          "component": "tee_client"
         }
       ]
     },
@@ -84,6 +119,12 @@
         },
         {
           "component": "xmp_toolkit_sdk"
+        },
+        {
+          "component": "expat"
+        },
+        {
+          "component": "libdrm"
         },
         {
           "component": "typescript"
@@ -110,6 +151,84 @@
           "component": "vma"
         },
         {
+          "component": "FreeBSD"
+        },
+        {
+          "component": "dav1d"
+        },
+        {
+          "component": "elfio"
+        },
+        {
+          "component": "freetype"
+        },
+        {
+          "component": "grpc"
+        },
+        {
+          "component": "harfbuzz"
+        },
+        {
+          "component": "iptables"
+        },
+        {
+          "component": "jerryscript"
+        },
+        {
+          "component": "lame"
+        },
+        {
+          "component": "libexif"
+        },
+        {
+          "component": "libinput"
+        },
+        {
+          "component": "libphonenumber"
+        },
+        {
+          "component": "libvpx"
+        },
+        {
+          "component": "meshoptimizer"
+        },
+        {
+          "component": "mtdev"
+        },
+        {
+          "component": "opencore-amr"
+        },
+        {
+          "component": "openmax"
+        },
+        {
+          "component": "opus"
+        },
+        {
+          "component": "re2"
+        },
+        {
+          "component": "rust_cxx"
+        },
+        {
+          "component": "rust_bindgen"
+        },
+        {
+          "component": "vulkan-headers"
+        },
+        {
+          "component": "flatbuffers"
+        },
+        {
+          "component": "vixl"
+        },
+        {
+          "component": "css-what"
+        },
+        {
+          "component": "opencl-headers"
+        },
+        {
           "component": "eudev",
           "exclude": "true"
         },
@@ -133,6 +252,9 @@
         },
         {
           "component": "asset"
+        },
+        {
+          "component": "security_component_manager"
         }
       ]
     }
