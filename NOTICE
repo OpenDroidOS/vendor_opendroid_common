@@ -1,0 +1,6 @@
+OpenDroidOS configuration for OpenHarmony
+Copyright 2026 OpenDroidOS
+Apache-2.0; see LICENSE.
+
+Uses OpenHarmony build interfaces.
+https://github.com/openharmony/build

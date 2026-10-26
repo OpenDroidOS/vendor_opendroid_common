@@ -1,0 +1,12 @@
+{
+  "subsystems": [
+    {
+      "subsystem": "security",
+      "components": [
+        {
+          "component": "selinux_adapter"
+        }
+      ]
+    }
+  ]
+}
