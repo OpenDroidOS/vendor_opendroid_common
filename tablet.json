@@ -1,0 +1,103 @@
+{
+  "subsystems": [
+    {
+      "subsystem": "ability",
+      "components": [
+        {
+          "component": "idl_tool"
+        }
+      ]
+    },
+    {
+      "subsystem": "arkcompiler",
+      "components": [
+        {
+          "component": "taihe_ffi_gen"
+        }
+      ]
+    },
+    {
+      "subsystem": "developtools",
+      "components": [
+        {
+          "component": "ace_js2bundle"
+        },
+        {
+          "component": "ace_ets2bundle"
+        },
+        {
+          "component": "global_resource_tool"
+        },
+        {
+          "component": "packing_tool"
+        }
+      ]
+    },
+    {
+      "subsystem": "sdk",
+      "components": [
+        {
+          "component": "sdk"
+        }
+      ]
+    },
+    {
+      "subsystem": "hdf",
+      "components": [
+        {
+          "component": "drivers_interface_memorytracker"
+        }
+      ]
+    },
+    {
+      "subsystem": "multimedia",
+      "components": [
+        {
+          "component": "ringtone_library"
+        }
+      ]
+    },
+    {
+      "subsystem": "thirdparty",
+      "components": [
+        {
+          "component": "parse5"
+        },
+        {
+          "component": "weex-loader"
+        },
+        {
+          "component": "xmp_toolkit_sdk"
+        },
+        {
+          "component": "typescript"
+        },
+        {
+          "component": "astc-encoder"
+        },
+        {
+          "component": "rust_libc"
+        },
+        {
+          "component": "eudev",
+          "exclude": "true"
+        },
+        {
+          "component": "libsnd",
+          "exclude": "true"
+        }
+      ]
+    },
+    {
+      "subsystem": "security",
+      "components": [
+        {
+          "component": "access_token",
+          "features": [
+            "access_token_enhance_capability = false"
+          ]
+        }
+      ]
+    }
+  ]
+}
