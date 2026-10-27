@@ -7,6 +7,28 @@
           "component": "selinux_adapter"
         }
       ]
+    },
+    {
+      "subsystem": "systemabilitymgr",
+      "components": [
+        {
+          "component": "safwk",
+          "features": [
+            "safwk_enable_run_on_demand_qos = false"
+          ]
+        }
+      ]
+    },
+    {
+      "subsystem": "hiviewdfx",
+      "components": [
+        {
+          "component": "hitrace",
+          "features": [
+            "hitrace_support_executable_file = true"
+          ]
+        }
+      ]
     }
   ]
 }
