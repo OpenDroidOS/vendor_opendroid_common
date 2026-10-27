@@ -18,3 +18,19 @@ assignments or component metadata, generation requires an explicit choice for
 that component; the override preserves that data.
 
 Tablet products inherit `tablet.json` after `productdefine/common/inherit/tablet.json`.
+
+`manifests/opendroid.xml` selects the shared repositories and the OpenDroidOS
+init and Skia forks. Use it with OpenHarmony `weekly_20261026`:
+
+```sh
+mkdir -p .repo/local_manifests
+curl -fL https://raw.githubusercontent.com/OpenDroidOS/vendor_opendroid_common/opendroid-7.0/manifests/opendroid.xml \
+  -o .repo/local_manifests/opendroid.xml
+repo sync -c -j8
+```
+
+Run these commands from the source root while no build or sync is running.
+Keep other local manifests from declaring the same projects. Board, kernel
+and device vendor repositories are cloned or created separately by the porter.
+After updating this repository, copy the manifest again before the next sync
+to pick up changes to the project list.
