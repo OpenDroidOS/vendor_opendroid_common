@@ -12,6 +12,10 @@
   <project name="third_party_skia" path="third_party/skia"
            remote="opendroid" revision="refs/heads/opendroid-7.0"
            groups="default,ohos:standard,ohos:system" />
+  <remove-project name="developtools_ace_ets2bundle" />
+  <project name="developtools_ace_ets2bundle" path="developtools/ace_ets2bundle"
+           remote="opendroid" revision="refs/heads/opendroid-7.0"
+           groups="default,ohos:small,ohos:standard,ohos:system" />
 
   <project name="device_soc_qualcomm_sm8735" path="device/soc/qualcomm/sm8735"
            remote="opendroid" revision="refs/heads/opendroid-7.0" />
