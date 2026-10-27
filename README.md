@@ -19,8 +19,8 @@ that component; the override preserves that data.
 
 Tablet products inherit `tablet.json` after `productdefine/common/inherit/tablet.json`.
 
-`manifests/opendroid.xml` selects the shared repositories and the OpenDroidOS
-init and Skia forks. Use it with OpenHarmony `weekly_20261026`:
+`manifests/opendroid.xml` selects the shared repositories and maintained
+OpenDroidOS platform forks. Use it with OpenHarmony `weekly_20261026`:
 
 ```sh
 mkdir -p .repo/local_manifests
