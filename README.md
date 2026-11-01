@@ -9,4 +9,5 @@ Source synchronization is configured by
 or created separately by the porter.
 
 See the [configuration reference](docs/configuration.md) for product inheritance,
-feature options and prebuilt kernel setup.
+feature options and prebuilt kernel setup. The [build and signing guide](docs/build-packages.md)
+covers automatic recovery packaging with a developer's own keys.

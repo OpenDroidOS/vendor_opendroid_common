@@ -13,6 +13,31 @@
 
 import("//build/ohos.gni")
 
+declare_args() {
+  opendroid_recovery_certificate = ""
+  opendroid_recovery_fstab = ""
+}
+
+assert((opendroid_recovery_certificate == "") == (opendroid_recovery_fstab == ""),
+       "Select both the recovery certificate and partition map.")
+
+if (opendroid_recovery_certificate != "") {
+  ohos_prebuilt_etc("recovery_certificate") {
+    source = opendroid_recovery_certificate
+    output = "signing_cert.crt"
+    module_install_dir = "etc/certificate"
+    install_images = [ "system", "updater" ]
+    part_name = "product_${product_name}"
+  }
+
+  ohos_prebuilt_etc("recovery_partition_map") {
+    source = opendroid_recovery_fstab
+    output = "fstab.updater"
+    install_images = [ "updater" ]
+    part_name = "product_${product_name}"
+  }
+}
+
 ohos_prebuilt_etc("distribution_parameters") {
   source = "opendroid.para"
   relative_install_dir = "param"
@@ -23,4 +48,7 @@ ohos_prebuilt_etc("distribution_parameters") {
 
 group("common") {
   deps = [ ":distribution_parameters" ]
+  if (opendroid_recovery_certificate != "") {
+    deps += [ ":recovery_certificate", ":recovery_partition_map" ]
+  }
 }
