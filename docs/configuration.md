@@ -61,7 +61,10 @@ validate that same immutable selection with `stage_kernel.py` before any
 installed copy. Module bytes retain the existing vendor installation.
 
 The selection's `module_load_order` additionally installs those modules and
-an ordered `/lib/modules/modules.load` in the native boot and updater/recovery ramdisks. Basenames must
+ordered `/lib/modules/modules.load` and `/lib/modules/modules.load.ohos` files in
+the native boot and updater/recovery ramdisks. Native init prefers the latter,
+so appending a vendor ramdisk cannot replace its selection with a vendor list.
+The conventional filename remains available to preceding init stages. Basenames must
 be unique, contain only letters, digits, underscore or hyphen, and end in
 `.ko`. Other modules stay out of the ramdisk. An empty order adds no ramdisk
 payload. Prepare the selection with the intended `--module-order` file; its

@@ -81,19 +81,30 @@ template("opendroid_kernel_modules") {
   if (_early_names != []) {
     _list = "$target_gen_dir/${target_name}/modules.load"
     write_file(_list, _early_names, "list lines")
-    _target = "${target_name}_early_order"
-    _targets += [ ":$_target" ]
-    ohos_prebuilt_etc(_target) {
-      source = _list
-      output = "$_target/modules.load"
-      module_install_dir = "lib/modules"
-      install_images = [
-        "ramdisk",
-        "updater",
-      ]
-      part_name = _part
-      subsystem_name = _subsystem
-      deps = [ _stage_dep ]
+    foreach(order_kind,
+            [
+              "legacy",
+              "native",
+            ]) {
+      _target = "${target_name}_early_order"
+      _name = "modules.load"
+      if (order_kind == "native") {
+        _target += "_native"
+        _name += ".ohos"
+      }
+      _targets += [ ":$_target" ]
+      ohos_prebuilt_etc(_target) {
+        source = _list
+        output = "$_target/$_name"
+        module_install_dir = "lib/modules"
+        install_images = [
+          "ramdisk",
+          "updater",
+        ]
+        part_name = _part
+        subsystem_name = _subsystem
+        deps = [ _stage_dep ]
+      }
     }
   }
   _module_files = []
