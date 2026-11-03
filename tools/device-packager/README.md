@@ -152,6 +152,21 @@ template remains kernel-less: it still needs its matching bootloader-selected
 kernel and vendor boot/DT inputs. The tool does not infer that boot contract or
 choose modules, logical partitions, slots or physical geometry.
 
+For a dedicated A/B recovery that is prepended to vendor and generic ramdisks,
+select `--ramdisk-layout ab-recovery`. This preserves the native payload and
+creates real `/system/bin` and `/system/etc` directory trees with aliases back
+to native files. It supplies `/system/bin/init` and `/system/bin/recovery` for
+the generic first-stage handoff; the latter points to the actual native Updater.
+A later generic directory entry can no longer replace a whole directory symlink
+and hide those files. Existing conflicting entries are rejected.
+
+The default `native` option preserves the selected ramdisk bytes. The explicit
+A/B option streams a new gzip CPIO without extracting files or changing payloads,
+modules, permissions, account databases or policy. The original ramdisk hash and
+prepared payload hash are reported separately. Temporary layout output is removed
+after container construction, including on failure. This does not prove OEM
+ramdisk selection, module/firmware compatibility or successful recovery boot.
+
 The output is unsigned. Templates with a v4 boot signature are rejected; no
 stale signature or AVB footer is copied. Apply the developer-selected keys and
 AVB chain with the signing tools before adding the result to the installation

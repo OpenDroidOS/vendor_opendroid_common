@@ -68,7 +68,10 @@ def copy_region(source, output, offset, size):
     return digest.hexdigest()
 
 
-def build(template, template_sha256, ramdisk, ramdisk_sha256, partition_size, output):
+def build(template, template_sha256, ramdisk, ramdisk_sha256, partition_size, output,
+          ramdisk_layout="native"):
+    if ramdisk_layout not in ("native", "ab-recovery"):
+        raise StageError("Select native or ab-recovery ramdisk layout")
     if type(partition_size) is not int or partition_size <= 0 or partition_size % PAGE_SIZE:
         raise StageError("Select a positive, page-aligned partition capacity in bytes")
     template, ramdisk, output = map(_absolute, (template, ramdisk, output))
@@ -80,6 +83,20 @@ def build(template, template_sha256, ramdisk, ramdisk_sha256, partition_size, ou
         if _hash_file(path)[0] != expected:
             raise StageError(f"SHA256 mismatch for {path.name}")
     header, info = template_header(template)
+    if ramdisk_layout == "ab-recovery":
+        from ramdisk_layout import prepare_ab_recovery
+        _directory(output.parent, create=True)
+        with tempfile.TemporaryDirectory(prefix=".recovery-layout-", dir=output.parent) as work:
+            prepared = Path(work) / "ramdisk.gz"
+            with prepared.open("xb") as stream:
+                layout = prepare_ab_recovery(ramdisk, stream)
+            if _hash_file(ramdisk)[0] != ramdisk_sha256:
+                raise StageError("Selected native ramdisk changed during layout preparation")
+            prepared_hash, _ = _hash_file(prepared)
+            result = build(template, template_sha256, prepared, prepared_hash,
+                           partition_size, output)
+        result.update(source_ramdisk_sha256=ramdisk_sha256, ramdisk_layout=layout)
+        return result
     ramdisk_size = _hash_file(ramdisk)[1]
     if not 0 < ramdisk_size <= 0xffffffff:
         raise StageError("Ramdisk must be nonempty and fit the header's 32-bit size field")
@@ -125,12 +142,14 @@ def main():
     parser.add_argument("--template-sha256", required=True)
     parser.add_argument("--ramdisk", required=True, type=Path)
     parser.add_argument("--ramdisk-sha256", required=True)
+    parser.add_argument("--ramdisk-layout", choices=("native", "ab-recovery"), default="native",
+                        help="Explicitly prepare native entrypoints for appended A/B recovery ramdisks")
     parser.add_argument("--partition-size", required=True, type=int)
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
     try:
         report = build(args.template, args.template_sha256, args.ramdisk,
-                       args.ramdisk_sha256, args.partition_size, args.output)
+                       args.ramdisk_sha256, args.partition_size, args.output, args.ramdisk_layout)
     except (StageError, OSError) as error:
         print(f"boot_image: {error}", file=sys.stderr)
         return 1
