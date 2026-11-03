@@ -50,3 +50,30 @@ Pass its path to the build as the GN argument `opendroid_kernel_selection`.
 Prepare a new selection after changing inputs or their paths. The build's
 staging step revalidates the selected files and kernel requirements before
 copying outputs. Run the script with `--help` for its arguments.
+
+
+## Modules needed before root mounts
+
+Kernel targets can import `kernel_modules.gni` and use
+`opendroid_kernel_modules` with their prepared `selection`, `stage_dir`,
+`stage_dep`, `part_name` and `subsystem_name`. The staging dependency must
+validate that same immutable selection with `stage_kernel.py` before any
+installed copy. Module bytes retain the existing vendor installation.
+
+The selection's `module_load_order` additionally installs those modules and
+an ordered `/lib/modules/modules.load` in the native boot and updater/recovery ramdisks. Basenames must
+be unique, contain only letters, digits, underscore or hyphen, and end in
+`.ko`. Other modules stay out of the ramdisk. An empty order adds no ramdisk
+payload. Prepare the selection with the intended `--module-order` file; its
+path and hash are part of the selection, not inferred from a source default.
+
+For products using this list, select the native init hook with the existing
+`init_extra_static_modules` feature, pointing to
+`//base/startup/init/services/modules/early_modules:early_modules`. If another
+static extension is already selected, use a group containing both targets.
+The hook runs before updater-mode dispatch, root discovery and required mounts. It uses normal
+kernel module checks and stops early init if a required module cannot load.
+
+Choose an explicit dependency-ordered set that matches the kernel, DT and
+firmware. Staging hashes, a native link and module ABI audits alone do not
+prove that a controller will probe or that the device will boot.

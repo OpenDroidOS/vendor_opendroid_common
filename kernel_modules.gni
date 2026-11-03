@@ -1,0 +1,126 @@
+# Copyright 2026 OpenDroidOS
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+
+# Install a previously validated kernel set. Entries in module_load_order are
+# also needed before root mounts, so keep their bytes and order in both native boot and recovery ramdisks.
+# invoker.stage_dep must revalidate the selection and stage_dir before copying.
+template("opendroid_kernel_modules") {
+  assert(
+      defined(invoker.selection) && defined(invoker.stage_dir) &&
+          defined(invoker.stage_dep) && defined(invoker.part_name) &&
+          defined(invoker.subsystem_name),
+      "Kernel modules require a selection, stage directory/dependency and component ownership")
+  _selection = invoker.selection
+  _stage_dir = invoker.stage_dir
+  _stage_dep = invoker.stage_dep
+  _part = invoker.part_name
+  _subsystem = invoker.subsystem_name
+  assert(
+      _stage_dir != "" && _stage_dep != "" && _part != "" && _subsystem != "",
+      "Kernel module staging and component ownership must be explicit")
+  _targets = []
+  _early_names = []
+  if (_selection.module_load_order != []) {
+    _early_index = 0
+  }
+  assert(len(_selection.module_load_order) <= 512,
+         "Early init accepts at most 512 modules")
+  foreach(destination, _selection.module_load_order) {
+    _matching = []
+    foreach(item, _selection.files) {
+      if (item.role == "module" && item.destination == destination) {
+        _matching += [ item ]
+      }
+    }
+    assert(len(_matching) == 1,
+           "Each early module must occur exactly once in the staged selection")
+    _name = get_path_info(destination, "file")
+    _stem = get_path_info(destination, "name")
+    _characters = _stem
+    foreach(
+        character,
+        string_split(
+            "a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 0 1 2 3 4 5 6 7 8 9 _ -")) {
+      _characters = string_replace(_characters, character, "")
+    }
+    assert(
+        get_path_info(destination, "extension") == "ko" && _stem != "" &&
+            _characters == "" && len(_name) <= 255,
+        "Early module filenames must contain letters, digits, underscore or hyphen and end in .ko")
+    assert(filter_include(_early_names, [ _name ]) == [],
+           "Early module basenames must be unique in /lib/modules")
+    _early_names += [ _name ]
+    _early_index += 1
+    _target = "${target_name}_early_${_early_index}"
+    _targets += [ ":$_target" ]
+    ohos_prebuilt_etc(_target) {
+      source = "$_stage_dir/$destination"
+      output = "$_target/$_name"
+      module_install_dir = "lib/modules"
+      install_images = [
+        "ramdisk",
+        "updater",
+      ]
+      part_name = _part
+      subsystem_name = _subsystem
+      deps = [ _stage_dep ]
+    }
+  }
+  if (_early_names != []) {
+    _list = "$target_gen_dir/${target_name}/modules.load"
+    write_file(_list, _early_names, "list lines")
+    _target = "${target_name}_early_order"
+    _targets += [ ":$_target" ]
+    ohos_prebuilt_etc(_target) {
+      source = _list
+      output = "$_target/modules.load"
+      module_install_dir = "lib/modules"
+      install_images = [
+        "ramdisk",
+        "updater",
+      ]
+      part_name = _part
+      subsystem_name = _subsystem
+      deps = [ _stage_dep ]
+    }
+  }
+  _module_files = []
+  foreach(item, _selection.files) {
+    if (item.role == "module") {
+      _module_files += [ item ]
+    }
+  }
+  if (_module_files != []) {
+    _index = 0
+  }
+  foreach(item, _module_files) {
+    _target = "${target_name}_vendor_$_index"
+    _index += 1
+    _targets += [ ":$_target" ]
+    ohos_prebuilt_etc(_target) {
+      source = "$_stage_dir/${item.destination}"
+      output = "$_target/" + get_path_info(item.destination, "file")
+      module_install_dir =
+          "lib/opendroid/" + get_path_info(item.destination, "dir")
+      install_images = [ vendor_base_dir ]
+      part_name = _part
+      subsystem_name = _subsystem
+      deps = [ _stage_dep ]
+    }
+  }
+  group(target_name) {
+    deps = _targets
+  }
+}
