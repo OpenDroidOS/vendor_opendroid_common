@@ -77,3 +77,19 @@ kernel module checks and stops early init if a required module cannot load.
 Choose an explicit dependency-ordered set that matches the kernel, DT and
 firmware. Staging hashes, a native link and module ABI audits alone do not
 prove that a controller will probe or that the device will boot.
+
+## Firmware needed during early probe
+
+A selected kernel manifest can include explicit `firmware` records. Stage their
+destinations below `kernel/firmware/`, preserving the filename or relative path
+requested by the driver. Each record uses the same source-path and SHA256 checks
+as the other selected files. Firmware selection also requires
+`CONFIG_FW_LOADER=y`; it does not establish that the payload matches the device.
+
+`opendroid_kernel_modules` installs those files in `/lib/firmware` in both native
+boot and recovery ramdisks, and in `/vendor/firmware` for the normal system.
+Subdirectories are preserved. This makes explicitly selected firmware available
+before required root mounts and module probes. No firmware is selected, obtained,
+renamed or redistributed by default. Keep stock payloads and their provenance
+outside public source repositories, and verify the kernel, driver and device
+contract before selecting them.

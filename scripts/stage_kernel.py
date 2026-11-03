@@ -33,7 +33,7 @@ class StageError(ValueError):
     """The selected files cannot safely satisfy the staging contract."""
 
 
-ROLES = {"kernel", "config", "module", "dtb", "dtbo"}
+ROLES = {"kernel", "config", "module", "dtb", "dtbo", "firmware"}
 HASH = re.compile(r"[0-9a-fA-F]{64}\Z")
 OPTION = re.compile(r"CONFIG_[A-Za-z0-9_]+\Z")
 REPORT_NAME = "stage-report.json"
@@ -120,6 +120,8 @@ def _manifest(data):
             raise StageError(f"Unknown role in files[{index}]")
         source = _relative(item["path"], f"files[{index}].path")
         destination = _relative(item["destination"], f"files[{index}].destination")
+        if item["role"] == "firmware" and not destination.startswith("kernel/firmware/"):
+            raise StageError("Selected firmware destination must be below kernel/firmware")
         if not isinstance(item["sha256"], str) or not HASH.fullmatch(item["sha256"]):
             raise StageError(f"files[{index}].sha256 must be a SHA256 hex digest")
         if source in sources:
@@ -407,6 +409,10 @@ def stage(manifest_path, requirements_path, output, allow_empty_output=False, ad
     manifest, manifest_hash = _json_file(manifest_path)
     entries = _manifest(manifest)
     required_options, descriptors = load_requirements(requirements_path, additional_requirements)
+    if any(entry["role"] == "firmware" for entry in entries):
+        if "y" not in required_options.get("CONFIG_FW_LOADER", ["y"]):
+            raise StageError("Selected firmware requires CONFIG_FW_LOADER=y")
+        required_options = dict(required_options, CONFIG_FW_LOADER=["y"])
     requirements_hash = descriptors[0][1]
     selection_hash = None
     extra_descriptors = []

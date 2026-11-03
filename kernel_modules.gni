@@ -120,6 +120,58 @@ template("opendroid_kernel_modules") {
       deps = [ _stage_dep ]
     }
   }
+  _firmware_index = 0
+  foreach(item, _selection.files) {
+    if (item.role == "firmware") {
+      _components = string_split(item.destination, "/")
+      assert(len(_components) >= 3 && _components[0] == "kernel" &&
+                 _components[1] == "firmware",
+             "Selected firmware must be staged below kernel/firmware")
+      _relative = ""
+      _component_index = 0
+      foreach(component, _components) {
+        if (_component_index >= 2) {
+          assert(component != "" && component != "." && component != "..",
+                 "Firmware paths must be relative without traversal")
+          if (_relative != "") {
+            _relative += "/"
+          }
+          _relative += component
+        }
+        _component_index += 1
+      }
+      _directory = get_path_info(_relative, "dir")
+      foreach(image_kind,
+              [
+                "early",
+                "vendor",
+              ]) {
+        _target = "${target_name}_firmware_${_firmware_index}_$image_kind"
+        _targets += [ ":$_target" ]
+        ohos_prebuilt_etc(_target) {
+          source = "$_stage_dir/${item.destination}"
+          output = "$_target/" + get_path_info(_relative, "file")
+          if (image_kind == "early") {
+            module_install_dir = "lib/firmware"
+            install_images = [
+              "ramdisk",
+              "updater",
+            ]
+          } else {
+            module_install_dir = "firmware"
+            install_images = [ vendor_base_dir ]
+          }
+          if (_directory != "." && _directory != "") {
+            module_install_dir += "/$_directory"
+          }
+          part_name = _part
+          subsystem_name = _subsystem
+          deps = [ _stage_dep ]
+        }
+      }
+      _firmware_index += 1
+    }
+  }
   group(target_name) {
     deps = _targets
   }
