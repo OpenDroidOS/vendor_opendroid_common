@@ -114,10 +114,17 @@ def _manifest(data):
     sources = set()
     result = []
     for index, item in enumerate(data["files"]):
-        if not isinstance(item, dict) or set(item) != {"role", "path", "sha256", "destination"}:
-            raise StageError(f"files[{index}] requires exactly role, path, sha256 and destination")
+        required = {"role", "path", "sha256", "destination"}
+        if not isinstance(item, dict) or set(item) not in (required, required | {"install_images"}):
+            raise StageError(f"files[{index}] requires role, path, sha256, destination and optional install_images")
         if not isinstance(item["role"], str) or item["role"] not in ROLES:
             raise StageError(f"Unknown role in files[{index}]")
+        if "install_images" in item:
+            images = item["install_images"]
+            if (item["role"] != "firmware" or not isinstance(images, list) or not images or
+                    any(not isinstance(image, str) or image not in {"ramdisk", "updater", "vendor"}
+                        for image in images) or len(images) != len(set(images))):
+                raise StageError("Firmware install_images must be a nonempty unique list of ramdisk, updater or vendor")
         source = _relative(item["path"], f"files[{index}].path")
         destination = _relative(item["destination"], f"files[{index}].destination")
         if item["role"] == "firmware" and not destination.startswith("kernel/firmware/"):

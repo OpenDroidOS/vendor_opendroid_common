@@ -91,6 +91,12 @@ as the other selected files. Firmware selection also requires
 
 `opendroid_kernel_modules` installs those files in `/lib/firmware` in both native
 boot and recovery ramdisks, and in `/vendor/firmware` for the normal system.
+An optional `install_images` array on a firmware record restricts those copies to
+`ramdisk`, `updater` and/or `vendor`. The list must be nonempty and contain no
+duplicates. For example, `"install_images": ["vendor"]` keeps system firmware out
+of both early ramdisks. Omitting the field preserves all three destinations.
+Select early destinations only for firmware required before the vendor filesystem
+becomes available; these settings do not make an unavailable runtime path usable.
 Subdirectories are preserved. This makes explicitly selected firmware available
 before required root mounts and module probes. No firmware is selected, obtained,
 renamed or redistributed by default. Keep stock payloads and their provenance

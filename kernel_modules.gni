@@ -134,6 +134,7 @@ template("opendroid_kernel_modules") {
   _firmware_index = 0
   foreach(item, _selection.files) {
     if (item.role == "firmware") {
+      _components = []
       _components = string_split(item.destination, "/")
       assert(len(_components) >= 3 && _components[0] == "kernel" &&
                  _components[1] == "firmware",
@@ -152,11 +153,33 @@ template("opendroid_kernel_modules") {
         _component_index += 1
       }
       _directory = get_path_info(_relative, "dir")
-      foreach(image_kind,
-              [
-                "early",
-                "vendor",
-              ]) {
+      _images = []
+      if (defined(item.install_images)) {
+        _images = item.install_images
+      } else {
+        _images = [
+          "ramdisk",
+          "updater",
+          "vendor",
+        ]
+      }
+      assert(_images != [], "Firmware install_images must not be empty")
+      foreach(image, _images) {
+        assert(image == "ramdisk" || image == "updater" || image == "vendor",
+               "Unknown firmware install image")
+        assert(len(filter_include(_images, [ image ])) == 1,
+               "Duplicate firmware install image")
+      }
+      _early_images = []
+      _early_images = filter_include(_images, [ "ramdisk", "updater" ])
+      _image_kinds = []
+      if (_early_images != []) {
+        _image_kinds += [ "early" ]
+      }
+      if (filter_include(_images, [ "vendor" ]) != []) {
+        _image_kinds += [ "vendor" ]
+      }
+      foreach(image_kind, _image_kinds) {
         _target = "${target_name}_firmware_${_firmware_index}_$image_kind"
         _targets += [ ":$_target" ]
         ohos_prebuilt_etc(_target) {
@@ -164,10 +187,7 @@ template("opendroid_kernel_modules") {
           output = "$_target/" + get_path_info(_relative, "file")
           if (image_kind == "early") {
             module_install_dir = "lib/firmware"
-            install_images = [
-              "ramdisk",
-              "updater",
-            ]
+            install_images = _early_images
           } else {
             module_install_dir = "firmware"
             install_images = [ vendor_base_dir ]
